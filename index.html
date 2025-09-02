@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Валентинка с кружочками</title>
+<style>
+  * {
+    user-select: none;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #ffe6e6;
+    font-family: 'Brush Script MT', cursive, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-container {
+    perspective: 1000px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .heart-card {
+    width: 400px;
+    height: 375px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+    cursor: pointer;
+  }
+
+  .heart-card.flipped {
+    transform: rotateY(180deg);
+  }
+
+  .heart-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .back {
+    transform: rotateY(180deg);
+  }
+
+  .front .heart {
+    position: relative;
+    width: 400px;
+    height: 375px;
+    transform: rotate(-45deg);
+    background: red;
+    animation: pulse 1s infinite;
+  }
+
+  .front .heart::before,
+  .front .heart::after {
+    content: "";
+    position: absolute;
+    width: 400px;
+    height: 375px;
+    border-radius: 50%;
+    background: red;
+  }
+
+  .front .heart::before { top: -187.5px; left: 0; }
+  .front .heart::after { top: 0; left: 200px; }
+
+  .back .heart {
+    position: relative;
+    width: 400px;
+    height: 375px;
+    transform: rotate(-45deg);
+    background: white;
+  }
+
+  .back .heart::before,
+  .back .heart::after {
+    content: "";
+    position: absolute;
+    width: 400px;
+    height: 375px;
+    border-radius: 50%;
+    background: white;
+  }
+
+  .back .heart::before { top: -187.5px; left: 0; }
+  .back .heart::after { top: 0; left: 200px; }
+
+  @keyframes pulse {
+    0%, 100% { transform: rotate(-45deg) scale(1); }
+    50% { transform: rotate(-45deg) scale(1.05); }
+  }
+
+  .heart-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1;
+    width: 90%;
+  }
+
+  .heart-text {
+    font-size: 1.6em;
+    margin-bottom: 15px;
+    color: red;
+  }
+
+  .gif-embed img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    pointer-events: none;
+  }
+
+  /* Падающие кружочки */
+  .floating-circle {
+    position: fixed;
+    top: -30px;
+    border-radius: 50%;
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 1;
+    animation: fall linear forwards;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* Анимация вылета гифки */
+  @keyframes flyUp {
+    0% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -200px) scale(0.5);
+    }
+  }
+
+  .gif-fly {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px;
+    height: auto;
+    z-index: 3;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<audio id="bgMusic" src="САМАЯ.mp3" autoplay loop></audio>
+
+<div class="card-container">
+  <div class="heart-card" id="heartCard">
+    <div class="heart-face front">
+      <div class="heart"></div>
+    </div>
+
+    <div class="heart-face back">
+      <div class="heart"></div>
+      <div class="heart-content">
+        <div class="heart-text">
+  Спасибо за чудесные полгода наших отношений! Я очень рад, что ты остаешься со мной. Это самое ценное, что у меня есть.  
+  Я люблю тебя! ❤️✨
+</div>
+        <div class="gif-embed">
+          <img src="crystal-amaru.gif" alt="Cute Cat Hug Emoji" />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Контейнер для анимации гифки "выпала" -->
+<div id="gifContainer"></div>
+
+<script>
+  const heartCard = document.getElementById('heartCard');
+  const gifContainer = document.getElementById('gifContainer');
+
+  // Переключение карточки
+  heartCard.addEventListener('click', () => {
+    heartCard.classList.toggle('flipped');
+
+    // Создаем гифку, которая "выпала" из сердца
+    const gif = document.createElement('img');
+    gif.src = 'crystal-amaru.gif'; // ваша гифка
+    gif.className = 'gif-fly';
+
+    // Помещаем гифку в контейнер
+    gifContainer.innerHTML = '';
+    gifContainer.appendChild(gif);
+
+    // Запускаем анимацию "улетания"
+    gif.animate([
+      { opacity: 1, transform: 'translate(-50%, -50%) scale(1)' },
+      { opacity: 0, transform: 'translate(-50%, -200px) scale(0.5)' }
+    ], {
+      duration: 1000,
+      easing: 'ease-out'
+    }).onfinish = () => {
+      gif.remove(); // удаляем после анимации
+    };
+  });
+
+  const bgMusic = document.getElementById('bgMusic');
+  document.body.addEventListener('click', () => {
+    if (bgMusic.paused) bgMusic.play();
+  });
+
+  // Функция создания падающего кружочка
+  function createCircle() {
+    const circle = document.createElement('div');
+    circle.classList.add('floating-circle');
+    const size = 10 + Math.random() * 20; // размер кружочка
+    circle.style.width = circle.style.height = size + 'px';
+    circle.style.left = Math.random() * window.innerWidth + 'px';
+    circle.style.background = Math.random() > 0.5 ? 'red' : 'pink';
+    circle.style.animationDuration = (3 + Math.random() * 4) + 's'; // скорость падения
+    document.body.appendChild(circle);
+
+    circle.addEventListener('animationend', () => {
+      circle.remove();
+    });
+  }
+
+  setInterval(createCircle, 150);
+</script>
+
+</body>
+</html>
